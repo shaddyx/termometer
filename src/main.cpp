@@ -46,16 +46,18 @@ bool waitingForBakingStart(){
 	return heater.get_ready() && started && !baking;
 }
 
+unsigned long getBakingTime(){
+	return millis() - baking_start_time;
+}
+
 char * getStatus(){
 	char format[30];
 	dtostrf(temp, 4, 2, format);
 	if (baking){
-		long t = millis() - baking_start_time;
-		sprintf(statusText, "%s tm %s", format, timeToString(t).c_str());
+		sprintf(statusText, "t:%s->%s", format, timeToString(getBakingTime()).c_str());
 	} else {
-		sprintf(statusText, "%s", format);
+		sprintf(statusText, "t:%s", format);
 	}
-	
 	return statusText;
 }
 
@@ -150,6 +152,7 @@ void stop(){
 		baking_start_time = 0;
 		start_time = 0;
 		baking = false;
+		started = false;
 	}
 }
 void start(){
@@ -157,13 +160,14 @@ void start(){
 		startBaking();
 		return;
 	}
+	if (started){
+		stop();
+	}
 	started = !started;
 	Serial.println("Started: " + String (started));
 	if (started){
 		settings_save(settings);
-	} else {
-		stop();
-	}
+	} 
 }
 
 void setupMenu(){
@@ -238,6 +242,12 @@ void updateTime(){
 	//menu.update();
 }
 
+void checkBaking(){
+	if (baking && getBakingTime() >= settings.targetTime){
+		stop();
+	}
+}
+
 void updateHeater(){
 	heater.set_current(temp);
 	heater.set_targetTemp(settings.targetTemp);
@@ -250,6 +260,7 @@ void loop() {
 	temp = getTemp();
 	updateHeater();
 	updateButtons();
+	checkBaking();
 	menuUpdateTimer.update();
 	timeUpdateTimer.update();
 }
