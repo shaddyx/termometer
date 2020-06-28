@@ -63,18 +63,23 @@ char * getStatus(){
 
 char * getSecondStatus(){
 	String statusText = String();
-	if (heater.get_signal()){
-		statusText += "H ";
+	if (!heater.is_error()){
+		if (heater.get_signal()){
+			statusText += "H ";
+		}
+		if (started){
+			statusText += "S ";
+		}
+		if (baking){
+			statusText += "B ";
+		}
+		if (waitingForBakingStart()){
+			statusText += "W ";
+		}
+	} else {
+		statusText += "Heater error";
 	}
-	if (started){
-		statusText += "S ";
-	}
-	if (baking){
-		statusText += "B ";
-	}
-	if (waitingForBakingStart()){
-		statusText += "W ";
-	}
+	
 	sprintf(secondStatusText, "%s", statusText.c_str());
 	return secondStatusText;
 }
@@ -242,6 +247,11 @@ void updateTime(){
 	//targetTime += 100;
 	//menu.update();
 }
+void checkError(){
+	if (heater.is_error()){
+		stop();
+	}
+}
 
 void checkBaking(){
 	if (baking && getBakingTime() >= settings.targetTime){
@@ -262,6 +272,7 @@ void loop() {
 	updateHeater();
 	updateButtons();
 	checkBaking();
+	checkError();
 	menuUpdateTimer.update();
 	timeUpdateTimer.update();
 }
