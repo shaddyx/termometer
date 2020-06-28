@@ -2,7 +2,7 @@
 #define HEATER_SETTINGS_
 typedef struct _Settings{
     float targetTemp;
-    long targetTime;
+    unsigned long targetTime;
 } Settings;
 
 void settings_save(Settings temp);

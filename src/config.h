@@ -9,8 +9,8 @@
 #define LINE_COUNT 2
 
 //LCD pin to Arduino
-#define INC 1
-#define DEC 2
+#define INCR 1
+#define DECR 2
 #define SELECT 2
 
 #define HEATER_PIN A1

@@ -32,11 +32,13 @@ Heater heater;
 
 float temp = 0;
 int start_time = 0;
+int baking_start_time = 0;
 char statusText[30];
 char secondStatusText[30];
-char targetTimeText[20];
+char targetTimeText[10];
 char startText[] = "Start";
 char stopText[] = "Stop";
+char bakeText[] = "Bake";
 bool started = false;
 bool baking = false;
 
@@ -46,9 +48,14 @@ bool waitingForBakingStart(){
 
 char * getStatus(){
 	char format[30];
-	long t = millis() - start_time;
 	dtostrf(temp, 4, 2, format);
-	sprintf(statusText, "%s tm %s", format, timeToString(t).c_str());
+	if (baking){
+		long t = millis() - baking_start_time;
+		sprintf(statusText, "%s tm %s", format, timeToString(t).c_str());
+	} else {
+		sprintf(statusText, "%s", format);
+	}
+	
 	return statusText;
 }
 
@@ -76,6 +83,9 @@ char * getTargetTime(){
 }
 
 char * getStartStop(){
+	if (waitingForBakingStart()){
+		return bakeText;
+	}
 	return started ? stopText: startText;
 }
 
@@ -126,18 +136,43 @@ void targetTempDown(){
 	settings.targetTemp -= TEMP_INCREMENT;
 }
 
+void startBaking(){
+	if (!waitingForBakingStart()){
+		return;
+	}
+	Serial.println("Started baking");
+	baking = true;
+	baking_start_time = millis();
+}
+void stop(){
+	if (started){
+		heater.set_enabled(false);
+		baking_start_time = 0;
+		start_time = 0;
+		baking = false;
+	}
+}
 void start(){
+	if (waitingForBakingStart()){
+		startBaking();
+		return;
+	}
 	started = !started;
 	Serial.println("Started: " + String (started));
+	if (started){
+		settings_save(settings);
+	} else {
+		stop();
+	}
 }
 
 void setupMenu(){
 	menu.set_focusSymbol(Position::LEFT, rFocus);
-	temp_control_value_line.attach_function(INC, targetTempUp);
-	temp_control_value_line.attach_function(DEC, targetTempDown);
-	time_control_value_line.attach_function(INC, targetTimeUp);
-	time_control_value_line.attach_function(DEC, targetTimeDown);
-	start_line.attach_function(1, start);
+	temp_control_value_line.attach_function(INCR, targetTempUp);
+	temp_control_value_line.attach_function(DECR, targetTempDown);
+	time_control_value_line.attach_function(INCR, targetTimeUp);
+	time_control_value_line.attach_function(DECR, targetTimeDown);
+	start_line.attach_function(INCR, start);
 	main_screen.set_displayLineCount(LINE_COUNT);
 	settings_screen.set_displayLineCount(LINE_COUNT);
 	menu.add_screen(main_screen);
@@ -146,6 +181,7 @@ void setupMenu(){
 
 void setup() {
 	btns_init();
+	settings = settings_load();
 	Serial.begin(115200);
 	Serial.println("App Started");
 	
@@ -176,11 +212,11 @@ void updateButtons(){
 	}
 	if (btns_pressed(BTN_RIGHT)){
 		Serial.println("Right pressed");
-		menu.call_function(INC);
+		menu.call_function(INCR);
 	}
 	if (btns_pressed(BTN_LEFT)){
 		Serial.println("Left pressed");
-		menu.call_function(DEC);
+		menu.call_function(DECR);
 	}
 	if (btns_pressed(BTN_UP)){
 		Serial.println("up pressed");
@@ -188,8 +224,7 @@ void updateButtons(){
 	}
 	if (btns_pressed(BTN_DOWN)){
 		Serial.println("down pressed");
-		menu.switch_focus(true);
-		
+		menu.switch_focus(true);	
 	}
 }
 
