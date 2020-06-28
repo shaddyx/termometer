@@ -40,6 +40,10 @@ char stopText[] = "Stop";
 bool started = false;
 bool baking = false;
 
+bool waitingForBakingStart(){
+	return heater.get_ready() && started && !baking;
+}
+
 char * getStatus(){
 	char format[30];
 	long t = millis() - start_time;
@@ -58,6 +62,9 @@ char * getSecondStatus(){
 	}
 	if (baking){
 		statusText += "B ";
+	}
+	if (waitingForBakingStart()){
+		statusText += "W ";
 	}
 	sprintf(secondStatusText, "%s", statusText.c_str());
 	return secondStatusText;
@@ -141,15 +148,18 @@ void setup() {
 	btns_init();
 	Serial.begin(115200);
 	Serial.println("App Started");
-	lcd.begin(16, 2);
-	lcd.setCursor(0,0);
-	lcd.print("Starting up...");
-	delay(200);
-
+	
+	pinMode(HEATER_PIN, OUTPUT);
+	digitalWrite(HEATER_PIN, 0);
 	pinMode(LED_BUILTIN, OUTPUT);
 	pinMode(A4, OUTPUT);
 	pinMode(A5, INPUT);
+
+	lcd.begin(16, 2);
+	lcd.setCursor(0,0);
+	lcd.print("Starting up...");
 	digitalWrite(A4, 1);
+	delay(200);
 	setupMenu();
 	//
 	//	SETUP timers
@@ -186,6 +196,8 @@ void updateButtons(){
 void updateMenu(){
 	menu.update();
 }
+
+
 void updateTime(){
 	//targetTime += 100;
 	//menu.update();
@@ -195,6 +207,7 @@ void updateHeater(){
 	heater.set_current(temp);
 	heater.set_targetTemp(settings.targetTemp);
 	heater.set_enabled(started);
+	digitalWrite(HEATER_PIN, heater.get_signal());
 }
 
 // the loop function runs over and over again forever

@@ -6,13 +6,14 @@
 #define TIME_INCREMENT (MINUTE * 5)
 #define TEMP_INCREMENT 10
 #define MAX_TEMP 250
-
 #define LINE_COUNT 2
 
 //LCD pin to Arduino
 #define INC 1
 #define DEC 2
 #define SELECT 2
+
+#define HEATER_PIN A1
 
 #define pin_RS 8
 #define pin_EN 9

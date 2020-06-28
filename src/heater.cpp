@@ -37,3 +37,8 @@ bool Heater::get_signal(){
     this->update();
     return this->heating;
 }
+
+bool Heater::get_ready(){
+    this->update();
+    return this->ready;
+}
