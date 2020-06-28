@@ -153,6 +153,7 @@ void stop(){
 		start_time = 0;
 		baking = false;
 		started = false;
+		Serial.println("Stopped");
 	}
 }
 void start(){
@@ -164,8 +165,8 @@ void start(){
 		stop();
 	}
 	started = !started;
-	Serial.println("Started: " + String (started));
 	if (started){
+		Serial.println("Started: " + String (started));
 		settings_save(settings);
 	} 
 }
