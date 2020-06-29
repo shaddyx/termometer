@@ -198,13 +198,15 @@ void setup() {
 	pinMode(HEATER_PIN, OUTPUT);
 	digitalWrite(HEATER_PIN, 0);
 	pinMode(LED_BUILTIN, OUTPUT);
-	pinMode(A4, OUTPUT);
-	pinMode(A5, INPUT);
-
+	pinMode(THERMISTORPIN, INPUT);
+	pinMode(THERMISTOR_PLUS_PIN, OUTPUT);
+	digitalWrite(THERMISTOR_PLUS_PIN, 1);
+	pinMode(THERMISTOR_GROUND_PIN, OUTPUT);
+	digitalWrite(THERMISTOR_GROUND_PIN, 0);
 	lcd.begin(16, 2);
 	lcd.setCursor(0,0);
 	lcd.print("Starting up...");
-	digitalWrite(A4, 1);
+	
 	delay(200);
 	setupMenu();
 	//

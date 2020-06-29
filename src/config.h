@@ -14,6 +14,10 @@
 #define SELECT 2
 
 #define HEATER_PIN A1
+#define THERMISTORPIN A5
+#define THERMISTOR_GROUND_PIN A3
+#define THERMISTOR_PLUS_PIN A4
+
 
 #define pin_RS 8
 #define pin_EN 9

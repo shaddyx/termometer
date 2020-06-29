@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "config.h"
 #include "temp.h"
 float safeRead(){
 	int samples[NUMSAMPLES];
